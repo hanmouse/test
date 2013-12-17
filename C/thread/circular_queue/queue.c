@@ -18,7 +18,7 @@ int init_queue( queue_t *queue, size_t size)
 
 static int queue_is_full( const queue_t *queue)
 {
-	return ((queue->rear + 1) % queue->size) == queue->front;
+	return (((queue->rear + 1) % queue->size) == queue->front);
 }
 
 int insert_queue_data( queue_t *queue, const unsigned char *data, size_t data_size)

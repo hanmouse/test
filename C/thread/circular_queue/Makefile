@@ -6,7 +6,6 @@ all: cirqueue_test
 
 objs = main.o reader.o queue.o file.o
 
-# counter
 cirqueue_test : $(objs)
 	$(CC) -o cirqueue_test $(objs) $(libs)
 

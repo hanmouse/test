@@ -21,8 +21,6 @@ int main( int argc, char **argv)
 	unsigned char data[MAX_QUEUE_DATA_SIZE];
 	reader_t *readers = get_readers();
 
-	sigaction();
-
 	for (i = 0; i < NUM_READERS; i++) {
 		e = pthread_create( &readers[i].thread, NULL, read_msgs, (void *) i);
 		if (e) {
