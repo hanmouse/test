@@ -27,7 +27,7 @@ void *read_msgs( void *param)
 		return NULL;
 	}
 
-	while (true) {
+	while (should_thread_keep_alive()) {
 		e = get_queue_data( queue, data, &data_size);
 		if (e < 0) {
 			fprintf( stderr, "get_queue_data() failed\n");
@@ -42,8 +42,9 @@ void *read_msgs( void *param)
 		printf( "[thread %d] data=%u, data_size=%zu\n", thread_id, int_data, data_size);
 
 		fprintf( file->fp, "data=%d\n", int_data);
-		fflush( file->fp);
 	}
+
+	finish_file( file->fp);
 
 	return NULL;
 }

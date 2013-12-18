@@ -21,6 +21,12 @@ int main( int argc, char **argv)
 	unsigned char data[MAX_QUEUE_DATA_SIZE];
 	reader_t *readers = get_readers();
 
+	e = init_sig_handler();
+	if (e < 0) {
+		fprintf( stderr, "failed to set signal handler\n");
+		return 1;
+	}
+
 	for (i = 0; i < NUM_READERS; i++) {
 		e = pthread_create( &readers[i].thread, NULL, read_msgs, (void *) i);
 		if (e) {
@@ -31,17 +37,15 @@ int main( int argc, char **argv)
 
 	sleep( 2);
 
-	for (i = 0; i < NUM_READERS; i++) {
-		for (j = 0; j < MAX_QUEUE_SIZE; j++) {
-			memcpy( data, &tmpval, sizeof( tmpval));
-			e = insert_queue_data( &readers[i].queue, data, sizeof( tmpval));
-			if (e < 0) {
-				fprintf( stderr, "insert_queue_data() failed: thread_id=%d\n", i);
-				continue;
-			}
-			printf( "data inserted into thread %d: data=%u\n", i, tmpval);
-			tmpval++;
+	for (i = 0; i < NUM_READERS * MAX_QUEUE_SIZE; i++) {
+		memcpy( data, &tmpval, sizeof( tmpval));
+		e = insert_queue_data( &readers[i % NUM_READERS].queue, data, sizeof( tmpval));
+		if (e < 0) {
+			fprintf( stderr, "insert_queue_data() failed: thread_id=%d\n", i);
+			continue;
 		}
+		printf( "data inserted into thread %d: data=%u\n", i, tmpval);
+		tmpval++;
 	}
 
 	for (i = 0; i < NUM_READERS; i++) {

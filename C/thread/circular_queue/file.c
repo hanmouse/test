@@ -13,3 +13,9 @@ int init_file( file_info_t *file, int thread_id)
 	return 0;
 }
 
+void finish_file( FILE *fp)
+{
+	fflush( fp);
+	fclose( fp);
+}
+

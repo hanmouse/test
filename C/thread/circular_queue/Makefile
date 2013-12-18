@@ -4,7 +4,7 @@ CFLAGS = -g
 
 all: cirqueue_test
 
-objs = main.o reader.o queue.o file.o
+objs = main.o reader.o queue.o file.o sighandle.o thread_life.o
 
 cirqueue_test : $(objs)
 	$(CC) -o cirqueue_test $(objs) $(libs)
@@ -20,6 +20,12 @@ queue.o : queue.c
 
 file.o : file.c
 	$(CC) -c file.c
+
+sighandle.o : sighandle.c
+	$(CC) -c sighandle.c
+
+thread_life.o : thread_life.c
+	$(CC) -c thread_life.c
 
 clean :
 	rm *.o cirqueue_test

@@ -10,6 +10,7 @@ typedef struct file_info_s {
 	FILE *fp;
 } file_info_t;
 
+void finish_file( FILE *fp);
 int init_file( file_info_t *file, int thread_id);
 
 #endif /* FILE_H */
