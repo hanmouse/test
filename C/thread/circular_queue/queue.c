@@ -50,8 +50,6 @@ int get_queue_data( queue_t *queue, unsigned char *data, size_t *data_size)
 	*data_size = 0;
 
 	if (queue_is_empty( queue)) {
-		fprintf( stderr, "queue is empty\n");
-		sleep( 1);
 		return 0;
 	}
 

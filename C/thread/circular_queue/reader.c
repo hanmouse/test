@@ -7,6 +7,7 @@ void *read_msgs( void *param)
 {
 	int thread_id = (int) param;
 	int e;
+	unsigned int count = 0U;
 	unsigned int int_data;
 	unsigned char data[MAX_QUEUE_DATA_SIZE];
 	size_t data_size;
@@ -27,7 +28,7 @@ void *read_msgs( void *param)
 		return NULL;
 	}
 
-	while (should_thread_keep_alive()) {
+	while (should_thread_keep_alive() && (count < MAX_QUEUE_SIZE)) {
 		e = get_queue_data( queue, data, &data_size);
 		if (e < 0) {
 			fprintf( stderr, "get_queue_data() failed\n");
@@ -42,6 +43,8 @@ void *read_msgs( void *param)
 		printf( "[thread %d] data=%u, data_size=%zu\n", thread_id, int_data, data_size);
 
 		fprintf( file->fp, "data=%d\n", int_data);
+		count++;
+		printf( "[thread %d] count=%u\n", thread_id, count);
 	}
 
 	finish_file( file->fp);
