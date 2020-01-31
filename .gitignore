@@ -1,2 +1,3 @@
 *.o
 *.bkup
+.DS_Store
