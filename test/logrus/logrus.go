@@ -22,13 +22,36 @@ import (
 [200203|20:53:25.619|DBCS.K|FMCDBG_FMCNanoMsgHandler.cpp|1|271|INFO|0]waitForMessageForSub()- recv _msg_IomDiskUsageReq_IomAgent
 */
 
+// Print Level 정의
+const (
+	_ = iota
+	PrintLevelCritical
+	PrintLevelMajor
+	PrintLevelMinor
+	PrintLevelData
+	PrintLevelComment
+)
+
+type configurations struct {
+	logFormat  string
+	printLevel int
+	// classification: ERROR, EVENT, INFO
+	classifications []string
+}
+
+var config = configurations{
+	logFormat:       "[%time%|%blockName%|%srcFileName%|%printLevel%|%codeLine%|%classification%|%logCode%]%msg%\n",
+	printLevel:      PrintLevelCritical,
+	classifications: []string{"ERROR", "INFO", "EVENT"},
+}
+
 func main() {
 
 	smsfLogger := logrus.New()
 
 	smsfLogger.SetFormatter(&easy.Formatter{
 		TimestampFormat: "20060102|15:04:05.999",
-		LogFormat:       "[%time%|%blockName%|%srcFileName%|%printLevel%|%codeLine%|%classification%|%logCode%]%msg%\n",
+		LogFormat:       config.logFormat,
 	})
 
 	smsfLoggerWithFields := smsfLogger.WithFields(logrus.Fields{
@@ -36,12 +59,7 @@ func main() {
 		"logCode":   0,
 	})
 
-	/*
-		classification := "EVENT"
-		printLevel := 2
-	*/
-
-	writeLog(smsfLoggerWithFields, "EVENT", 2, "%s %d occurred", "Strange Error", 999)
+	WriteLog(smsfLoggerWithFields, "EVENT", PrintLevelCritical, "%s %d occurred", "Strange Error", 999)
 }
 
 func makeSourceInfo() logrus.Fields {
@@ -60,16 +78,30 @@ func makeSourceInfo() logrus.Fields {
 	return logrus.Fields{"file": "unknown"}
 }
 
-func writeLog(entry *logrus.Entry, classification string, printLevel int, format string, args ...interface{}) {
+// WriteLog 로그를 쓴다.
+func WriteLog(entry *logrus.Entry, classification string, printLevel int, format string, args ...interface{}) {
+
+	if !isClassificationEnabled(classification) || (printLevel > config.printLevel) {
+		return
+	}
 
 	srcInfo := makeSourceInfo()
 
-	logger2 := entry.WithFields(logrus.Fields{
+	logger := entry.WithFields(logrus.Fields{
 		"classification": classification,
 		"printLevel":     printLevel,
 		"srcFileName":    srcInfo["file"],
 		"codeLine":       srcInfo["line"],
 	})
 
-	logger2.Errorf(format, args...)
+	logger.Errorf(format, args...)
+}
+
+func isClassificationEnabled(classification string) bool {
+	for _, v := range config.classifications {
+		if classification == v {
+			return true
+		}
+	}
+	return false
 }
