@@ -3,6 +3,7 @@ package main
 import (
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
@@ -30,40 +31,44 @@ func main() {
 		LogFormat:       "[%time%|%blockName%|%srcFileName%|%printLevel%|%codeLine%|%classification%|%logCode%]%msg%\n",
 	})
 
-	const blockName = "SMSF"
-	const printLevel = 2
-	const classification = "EVENT"
-	const logCode = 0
-
-	srcFileName, codeLine := getSrcFileInfo()
-
 	smsfLoggerWithFields := smsfLogger.WithFields(logrus.Fields{
-		"blockName":   blockName,
-		"srcFileName": srcFileName,
-		"codeLine":    codeLine,
-		"logCode":     logCode,
+		"blockName": "usmsf",
+		"logCode":   0,
 	})
 
-	writeLog(smsfLoggerWithFields, classification, printLevel, "%s %d occurred", "Strange Error", 999)
+	/*
+		classification := "EVENT"
+		printLevel := 2
+	*/
+
+	writeLog(smsfLoggerWithFields, "EVENT", 2, "%s %d occurred", "Strange Error", 999)
 }
 
-// TODO line은 원하는 정보와 다르군...
-func getSrcFileInfo() (string, int) {
+func makeSourceInfo() logrus.Fields {
 
-	_, fileName, line, ok := runtime.Caller(0)
-	if !ok {
-		fileName = "unknown"
-		line = 0
+	for i := 2; i < 50; i++ {
+		_, file, line, ok := runtime.Caller(i)
+		if ok {
+			if strings.HasSuffix(file, "_noposline.go") {
+				continue
+			}
+			return logrus.Fields{"file": filepath.Base(file), "line": line}
+		}
+		break
 	}
 
-	return filepath.Base(fileName), line
+	return logrus.Fields{"file": "unknown"}
 }
 
 func writeLog(entry *logrus.Entry, classification string, printLevel int, format string, args ...interface{}) {
 
+	srcInfo := makeSourceInfo()
+
 	logger2 := entry.WithFields(logrus.Fields{
 		"classification": classification,
 		"printLevel":     printLevel,
+		"srcFileName":    srcInfo["file"],
+		"codeLine":       srcInfo["line"],
 	})
 
 	logger2.Errorf(format, args...)
