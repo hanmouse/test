@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -32,34 +33,128 @@ const (
 	PrintLevelComment
 )
 
+type logConfig struct {
+	// printLevel map의 key는 classification 이름 (e.g. "SELFDIAG", "ERROR")
+	printLevel map[string]int
+}
+
 type configurations struct {
-	logFormat  string
-	printLevel int
-	// classification: ERROR, EVENT, INFO
-	classifications []string
+	alarm logConfig
+	diag  logConfig
+	app   logConfig
 }
 
 var config = configurations{
-	logFormat:       "[%time%|%blockName%|%srcFileName%|%printLevel%|%codeLine%|%classification%|%logCode%]%msg%\n",
-	printLevel:      PrintLevelCritical,
-	classifications: []string{"ERROR", "INFO", "EVENT"},
+	alarm: logConfig{
+		printLevel: map[string]int{
+			"FAULT": PrintLevelMajor,
+		},
+	},
+	diag: logConfig{
+		printLevel: map[string]int{
+			"SELFDIAG": PrintLevelMinor,
+			"RESET":    PrintLevelMinor,
+			"INIT":     PrintLevelMinor,
+			"CONFIG":   PrintLevelMinor,
+		},
+	},
+	app: logConfig{
+		printLevel: map[string]int{
+			"ERROR": PrintLevelMajor,
+			"EVENT": PrintLevelMinor,
+			"INFO":  PrintLevelData,
+		},
+	},
+}
+
+// SamsungLogger : 삼성향 logger 정의
+type SamsungLogger struct {
+	logger *logrus.Logger
+	entry  *logrus.Entry
+	config *logConfig
+}
+
+// SamsungLoggers : 삼성향 logger들의 집합
+type SamsungLoggers struct {
+	alarm SamsungLogger
+	diag  SamsungLogger
+	app   SamsungLogger
+}
+
+func (s *SamsungLogger) init(config *logConfig) {
+
+	s.config = config
+
+	s.logger = logrus.New()
+
+	s.logger.SetFormatter(&easy.Formatter{
+		TimestampFormat: "20060102|15:04:05.999",
+		LogFormat:       "[%time%|%blockName%|%srcFileName%|%printLevel%|%codeLine%|%classification%|%logCode%]%msg%\n",
+	})
+
+	s.entry = s.logger.WithFields(logrus.Fields{
+		"blockName": filepath.Base(os.Args[0]),
+		"logCode":   0,
+	})
+}
+
+// Init : logger들을 초기화한다.
+func (loggers *SamsungLoggers) Init() {
+
+	loggers.alarm.init(&config.alarm)
+	loggers.diag.init(&config.diag)
+	loggers.app.init(&config.app)
+}
+
+// AlarmLogger : alarm logger를 반환한다.
+func (loggers *SamsungLoggers) AlarmLogger() *SamsungLogger {
+	return &loggers.alarm
+}
+
+// DiagLogger : diag logger를 반환한다.
+func (loggers *SamsungLoggers) DiagLogger() *SamsungLogger {
+	return &loggers.diag
+}
+
+// AppLogger : app logger를 반환한다.
+func (loggers *SamsungLoggers) AppLogger() *SamsungLogger {
+	return &loggers.app
+}
+
+// Log : 로그를 기록한다.
+func (s *SamsungLogger) Log(classification string, printLevel int, format string, args ...interface{}) {
+
+	_, present := s.config.printLevel[classification]
+	if !present || (printLevel > s.config.printLevel[classification]) {
+		return
+	}
+
+	srcInfo := makeSourceInfo()
+
+	logger := s.entry.WithFields(logrus.Fields{
+		"classification": classification,
+		"printLevel":     printLevel,
+		"srcFileName":    srcInfo["file"],
+		"codeLine":       srcInfo["line"],
+	})
+
+	logger.Errorf(format, args...)
 }
 
 func main() {
 
-	smsfLogger := logrus.New()
+	var loggers SamsungLoggers
 
-	smsfLogger.SetFormatter(&easy.Formatter{
-		TimestampFormat: "20060102|15:04:05.999",
-		LogFormat:       config.logFormat,
-	})
+	loggers.Init()
 
-	smsfLoggerWithFields := smsfLogger.WithFields(logrus.Fields{
-		"blockName": "usmsf",
-		"logCode":   0,
-	})
+	alarmLogger := loggers.AlarmLogger()
+	diagLogger := loggers.DiagLogger()
+	appLogger := loggers.AppLogger()
 
-	WriteLog(smsfLoggerWithFields, "EVENT", PrintLevelCritical, "%s %d occurred", "Strange Error", 999)
+	alarmLogger.Log("FAULT", PrintLevelCritical, "Alarm!!!: code %#v", 2)
+	diagLogger.Log("RESET", PrintLevelMajor, "System Reset")
+	appLogger.Log("EVENT", PrintLevelMinor, "%s %d occurred", "Strange Error", 999)
+	appLogger.Log("UNKNOWN", PrintLevelMinor, "%s %d occurred", "Strange Error", 999)
 }
 
 func makeSourceInfo() logrus.Fields {
@@ -76,32 +171,4 @@ func makeSourceInfo() logrus.Fields {
 	}
 
 	return logrus.Fields{"file": "unknown"}
-}
-
-// WriteLog 로그를 쓴다.
-func WriteLog(entry *logrus.Entry, classification string, printLevel int, format string, args ...interface{}) {
-
-	if !isClassificationEnabled(classification) || (printLevel > config.printLevel) {
-		return
-	}
-
-	srcInfo := makeSourceInfo()
-
-	logger := entry.WithFields(logrus.Fields{
-		"classification": classification,
-		"printLevel":     printLevel,
-		"srcFileName":    srcInfo["file"],
-		"codeLine":       srcInfo["line"],
-	})
-
-	logger.Errorf(format, args...)
-}
-
-func isClassificationEnabled(classification string) bool {
-	for _, v := range config.classifications {
-		if classification == v {
-			return true
-		}
-	}
-	return false
 }
