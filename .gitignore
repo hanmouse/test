@@ -1,3 +1,4 @@
 *.o
 *.bkup
 .DS_Store
+*.exe

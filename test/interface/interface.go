@@ -86,8 +86,25 @@ func typeAssertionTest2() {
 	fmt.Println(f)
 }
 
+type myError struct {
+}
+
+func (myError) Error() string {
+	return "My Error!!"
+}
+
+func printMyError(err error) {
+	fmt.Println(err.Error())
+}
+
+func myErrorTest() {
+	var myError myError
+	printMyError(myError)
+}
+
 func main() {
 	//shapeTest()
 	//typeAssertionTest1()
-	typeAssertionTest2()
+	//typeAssertionTest2()
+	myErrorTest()
 }
