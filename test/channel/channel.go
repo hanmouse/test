@@ -9,10 +9,13 @@ import (
 
 func main() {
 
-	test1()
-	test2()
-	test3()
-	test4()
+	/*
+		test1()
+		test2()
+		test3()
+		test4()
+	*/
+	test5()
 }
 
 func test1() {
@@ -106,5 +109,34 @@ func test4() {
 	*/
 	for num := range ch {
 		println(num)
+	}
+}
+
+func server1(ch chan string) {
+	ch <- "from server1"
+}
+
+func server2(ch chan string) {
+	ch <- "from server2"
+}
+
+func test5() {
+
+	println("[test5]")
+
+	ch1 := make(chan string)
+	ch2 := make(chan string)
+
+	go server1(ch1)
+	go server2(ch2)
+
+	time.Sleep(1 * time.Second)
+
+	// ch1과 ch2 중 랜덤하게 선택
+	select {
+	case str1 := <-ch1:
+		fmt.Println("str1:", str1)
+	case str2 := <-ch2:
+		fmt.Println("str2:", str2)
 	}
 }
