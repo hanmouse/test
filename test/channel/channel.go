@@ -20,6 +20,7 @@ func test1() {
 	fmt.Printf("\n[%v]\n", curr.Func())
 
 	ch := make(chan int)
+	fmt.Println("[main] Created int channel")
 
 	go func() {
 		num := 100
@@ -41,15 +42,21 @@ func test2() {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			fmt.Println(i)
+			fmt.Printf("[goroutine] i=%#v\n", i)
+			time.Sleep(time.Millisecond * 100)
 		}
 
 		// 일 다 끝냈으니 다 됐다고 메인 루틴에 알린다.
+		fmt.Printf("[goroutine] printing job completed\n")
 		done <- true
 	}()
 
+	fmt.Println("[main] Called goroutine for printing job")
+
 	// 위의 Go루틴이 끝날 때까지 대기
+	fmt.Println("[main] Waiting for report from goroutine")
 	<-done
+	fmt.Println("[main] Received job completion report from goroutine")
 }
 
 func test3() {
