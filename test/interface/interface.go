@@ -89,7 +89,7 @@ func typeAssertionTest2() {
 type myError struct {
 }
 
-func (myError) Error() string {
+func (r *myError) Error() string {
 	return "My Error!!"
 }
 
@@ -98,7 +98,7 @@ func printMyError(err error) {
 }
 
 func myErrorTest() {
-	var myError myError
+	var myError *myError
 	printMyError(myError)
 }
 
