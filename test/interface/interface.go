@@ -2,9 +2,20 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"math"
+	"os"
 	"reflect"
 )
+
+func main() {
+	//shapeTest()
+	//typeAssertionTest1()
+	//typeAssertionTest2()
+	//myErrorTest()
+	writerTest()
+}
 
 // Shape 도형의 면적, 둘레 길이 등을 구하는 method 모음
 type Shape interface {
@@ -102,9 +113,40 @@ func myErrorTest() {
 	printMyError(myError)
 }
 
-func main() {
-	//shapeTest()
-	//typeAssertionTest1()
-	//typeAssertionTest2()
-	myErrorTest()
+type myWriter struct {
+	filePath string
+	file     *os.File
+}
+
+func (w *myWriter) openFile(filePath string) {
+
+	var err error
+
+	w.filePath = filePath
+
+	w.file, err = os.OpenFile(w.filePath, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// io.Writer의 Write()를 구현한다.
+func (w *myWriter) Write(p []byte) (n int, err error) {
+	return io.WriteString(w.file, string(p))
+}
+
+func (w *myWriter) closeFile() {
+	w.file.Close()
+}
+
+func writerTest() {
+
+	w := &myWriter{}
+
+	w.openFile("./test.txt")
+
+	// io.Writer의 Write()를 구현한 myWriter type의 변수인 w를 인자로 입력
+	fmt.Fprintf(w, "Hello!")
+
+	w.closeFile()
 }
