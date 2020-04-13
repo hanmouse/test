@@ -98,10 +98,20 @@ func typeAssertionTest2() {
 }
 
 type myError struct {
+	msg string
 }
 
-func (r *myError) Error() string {
-	return "My Error!!"
+func (e *myError) Error() string {
+
+	rval := ""
+
+	if e != nil && e.msg != "" {
+		rval = e.msg
+	} else {
+		rval = "Default Error"
+	}
+
+	return rval
 }
 
 func printMyError(err error) {
@@ -109,8 +119,13 @@ func printMyError(err error) {
 }
 
 func myErrorTest() {
-	var myError *myError
-	printMyError(myError)
+	//var myError1 = &myError{}
+	var myError1 *myError = nil
+	fmt.Println("type of myError1: ", reflect.TypeOf(myError1))
+	printMyError(myError1)
+
+	var myError2 = &myError{msg: "My Error!!"}
+	printMyError(myError2)
 }
 
 type myWriter struct {
