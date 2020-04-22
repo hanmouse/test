@@ -2,39 +2,26 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/go-akka/configuration"
 )
 
-var configText = `
-DRA_LIST = [
-    {
-    	host = JKT1
-        ipaddr = 10.37.202.77
-        dbname = udra
-        port = 3306
-        user = root
-        pass = root.1231
-    }
-  {
-    	host = JKT2
-        ipaddr = 10.41.113.1
-        dbname = udra
-        port = 3306
-        user = root
-        pass = root.123
-    }
-]
-`
-
 func main() {
 
-	conf := configuration.ParseString(configText)
+	if len(os.Args) != 2 {
+		fmt.Printf("Usage: %v <config_file_path>\n", filepath.Base(os.Args[0]))
+		return
+	}
 
-	draList := conf.GetValue("DRA_LIST")
+	configFilePath := os.Args[1]
 
-	list := draList.GetArray()
-	for _, dra := range list {
+	conf := configuration.LoadConfig(configFilePath)
+
+	draList := conf.GetValue("DRA_LIST").GetArray()
+
+	for _, dra := range draList {
 		obj := dra.GetObject()
 		host := obj.GetKey("host").GetString()
 		ipaddr := obj.GetKey("ipaddr").GetString()
