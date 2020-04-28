@@ -14,7 +14,8 @@ func main() {
 	//typeAssertionTest1()
 	//typeAssertionTest2()
 	//myErrorTest()
-	writerTest()
+	//writerTest()
+	satisfactionTest()
 }
 
 // Shape 도형의 면적, 둘레 길이 등을 구하는 method 모음
@@ -164,4 +165,34 @@ func writerTest() {
 	fmt.Fprintf(w, "Hello!")
 
 	w.closeFile()
+}
+
+type LegoCreator interface {
+	Prepare()
+	Build()
+	Display()
+}
+
+type LegoCreatorImpl struct {
+}
+
+func (r LegoCreatorImpl) Prepare() {
+	fmt.Println("Prepared!")
+}
+
+func (r LegoCreatorImpl) Build() {
+	fmt.Println("Built!")
+}
+
+func (r LegoCreatorImpl) Display() {
+	fmt.Println("Displayed!")
+}
+
+func satisfactionTest() {
+
+	var creator LegoCreator = &LegoCreatorImpl{}
+
+	creator.Prepare()
+	creator.Build()
+	creator.Display()
 }
