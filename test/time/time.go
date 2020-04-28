@@ -9,9 +9,10 @@ func main() {
 
 	var sleepTime time.Duration = 3 * time.Second
 
-	fmt.Printf("Timer started (waiting for %v): %v\n", sleepTime, time.Now().Format(time.UnixDate))
+	startTime := time.Now()
+	fmt.Printf("Timer started: %v (waiting for %v)\n", startTime.Format(time.UnixDate), sleepTime)
 
 	timeAfter := <-time.After(sleepTime)
 
-	fmt.Printf("Timer stopped: %v\n", timeAfter.Format(time.UnixDate))
+	fmt.Printf("Timer stopped: %v (%v elapsed)\n", timeAfter.Format(time.UnixDate), time.Since(startTime))
 }
