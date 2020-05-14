@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 
@@ -14,6 +16,8 @@ func main() {
 	fmt.Printf("i=%#v, s=%#v, pi=%#v\n", i, s, pi)
 
 	interfaceTypeReturningFunc()
+
+	structCopyTest()
 }
 
 func returnUninitializedReturnValues() (i int, s string, pi *int) {
@@ -24,4 +28,28 @@ func returnUninitializedReturnValues() (i int, s string, pi *int) {
 func interfaceTypeReturningFunc() interface{} {
 	fmt.Println("interfaceTypeReturningFunc")
 	return nil
+}
+
+type myProfile struct {
+	id      string
+	company string
+}
+
+func structCopyTest() {
+
+	profile := myProfile{
+		id:      "hanmouse",
+		company: "uangel",
+	}
+
+	receiveStruct(&profile)
+}
+
+func receiveStruct(profile *myProfile) {
+
+	var nonPointerProfile myProfile
+
+	nonPointerProfile = *profile
+
+	fmt.Printf("%#v\n", nonPointerProfile)
 }
