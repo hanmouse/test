@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
-	//redeclarationAndReassignmentTest()
+	redeclarationAndReassignmentTest()
 	//forTest()
-	typeSwitchTest()
+	//typeSwitchTest()
 }
 
 type redeclarationAndReassignment struct {
@@ -134,6 +134,9 @@ func (r *typeSwitch) test1() {
 
 	t = r.functionOfSomeType()
 
+	// 여기서는 이렇게는 불가. switch 문에서만 가능.
+	//t = t.(type)
+
 	switch t := t.(type) {
 	default:
 		fmt.Printf("unexpected type %T\n", t) // %T prints whatever type t has
@@ -146,6 +149,23 @@ func (r *typeSwitch) test1() {
 	case *int:
 		fmt.Printf("pointer to integer %d\n", *t) // t has type *int
 	}
+
+	// "switch t.(type)"으로 하면, t 값에 대한 접근이 불편해짐.
+	// 따라서 "switch t := t.(type)"와 같이 쓰자.
+	/*
+		switch t.(type) {
+		default:
+			fmt.Printf("unexpected type %T\n", t) // %T prints whatever type t has
+		case bool:
+			fmt.Printf("boolean %t\n", t) // t has type bool
+		case int:
+			fmt.Printf("integer %d\n", t) // t has type int
+		case *bool:
+			fmt.Printf("pointer to boolean %t\n", *t) // t has type *bool
+		case *int:
+			fmt.Printf("pointer to integer %d\n", *t) // t has type *int
+		}
+	*/
 }
 
 func (r *typeSwitch) functionOfSomeType() interface{} {
