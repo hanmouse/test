@@ -8,21 +8,30 @@ import (
 )
 
 func main() {
-	err := doSomethingWithFuture()
+
+	var err error
+	timeout, _ := time.ParseDuration("3s")
+	runningTime, _ := time.ParseDuration("5s")
+
+	err = doSomethingWithFuture(timeout, runningTime)
 	if err != nil {
-		ulog.Fatal("Failed to do something: %s", err)
+		ulog.Warn("Failed to do something with future: %s", err)
+	}
+
+	err = doSomethingWithAwaiter(timeout, runningTime)
+	if err != nil {
+		ulog.Warn("Failed to do something with awaiter: %s", err)
 	}
 }
 
-func doSomethingWithFuture() error {
+func doSomethingWithFuture(timeout time.Duration, runningTime time.Duration) error {
 
 	ch := make(chan error, 1)
 
 	execContext := exec.ContextNoLimit()
-	queryTimeout, _ := time.ParseDuration("1s")
 
-	future := exec.GoWithTimeout(execContext, queryTimeout, func() {
-		err := doSomething()
+	future := exec.GoWithTimeout(execContext, timeout, func() {
+		err := doSomething(runningTime)
 		// doSomething이 완료되면 결과를 ch 로 보냅니다.
 		// 타임 아웃이 먼저 발생해도 , 여기는 항상 실행된다는 것을 주의 하세요.
 		// 그래서  ch 의 크기를 1로 잡거나, 여기서는 non blocking으로 send 해야 합니다.
@@ -35,13 +44,26 @@ func doSomethingWithFuture() error {
 		ch <- err
 	}, exec.ContextNoLimit())
 
-	err := <-ch
-	ulog.Info("error=%#v", err)
-
-	return err
+	return <-ch
 }
 
-func doSomething() error {
-	time.Sleep(2 * time.Second)
+func doSomething(runningTime time.Duration) error {
+	time.Sleep(runningTime)
 	return nil
+}
+
+func doSomethingWithAwaiter(timeout time.Duration, runningTime time.Duration) error {
+
+	someContext := exec.ContextNoLimit()
+	awaiter := exec.NewAwaiter(someContext, timeout)
+
+	err := awaiter.AwaitFunc0Err(
+		func() error {
+			// 여기 안의 함수는 someContext 안에서 실행됩니다.
+			err := doSomething(runningTime)
+			return err
+		},
+	)
+
+	return err
 }
