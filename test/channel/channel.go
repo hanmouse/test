@@ -14,8 +14,10 @@ func main() {
 		test2()
 		test3()
 		test4()
+		test5()
+		test6()
 	*/
-	test5()
+	test7()
 }
 
 func test1() {
@@ -138,5 +140,51 @@ func test5() {
 		fmt.Println("str1:", str1)
 	case str2 := <-ch2:
 		fmt.Println("str2:", str2)
+	}
+}
+
+func squares(c chan int) {
+	/*
+		for i := 0; i < 3; i++ {
+			num := <-c
+			fmt.Println(num * num)
+			time.Sleep(1 * time.Second)
+		}
+	*/
+	for num := range c {
+		fmt.Println(num * num)
+	}
+}
+
+// TODO
+func test6() {
+	c := make(chan int, 3)
+
+	go squares(c)
+
+	c <- 1
+	c <- 2
+	c <- 3
+	c <- 4
+	c <- 5
+	c <- 6
+	c <- 7
+	c <- 8
+	c <- 9
+	c <- 10
+
+	time.Sleep(1 * time.Second)
+}
+
+func test7() {
+
+	queue := make(chan int, 2)
+	queue <- 1
+	queue <- 2
+	close(queue)
+
+	// channel이 닫혀야 for range loop가 종료된다.
+	for v := range queue {
+		fmt.Println(v)
 	}
 }
