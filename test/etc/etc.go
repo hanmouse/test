@@ -2,11 +2,23 @@ package main
 
 import (
 	"fmt"
+	"runtime"
+	"strings"
 )
+
+type test struct {
+	name string
+}
 
 func main() {
 
 	var str string
+	var intval int
+
+	var numCPU = runtime.NumCPU()
+	fmt.Printf("numCPU=%#v\n", numCPU)
+
+	fmt.Printf("str: %#v, intval: %#v\n", str, intval)
 
 	str = fmt.Sprintf(":%d", 8080)
 
@@ -18,6 +30,25 @@ func main() {
 	interfaceTypeReturningFunc()
 
 	structCopyTest()
+
+	//var testVar test
+	//testVar.name = "aaa"
+
+	a := &test{
+		name: "aaa",
+	}
+
+	fmt.Println(a)
+
+	/*
+		a := testVar{
+			name: "aaa",
+		}
+	*/
+
+	file := "aaaaa/bbbbb/ccccc/ddddd.go"
+	fileName := strings.Join(lastthree(strings.Split(file, "/")), "/")
+	println(fileName)
 }
 
 func returnUninitializedReturnValues() (i int, s string, pi *int) {
@@ -52,4 +83,11 @@ func receiveStruct(profile *myProfile) {
 	nonPointerProfile = *profile
 
 	fmt.Printf("%#v\n", nonPointerProfile)
+}
+
+func lastthree(s []string) []string {
+	if len(s) <= 3 {
+		return s
+	}
+	return s[len(s)-3:]
 }

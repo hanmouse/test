@@ -15,7 +15,8 @@ func main() {
 	//typeAssertionTest2()
 	//myErrorTest()
 	//writerTest()
-	satisfactionTest()
+	//satisfactionTest()
+	interfaceInInterfaceTest()
 }
 
 // Shape 도형의 면적, 둘레 길이 등을 구하는 method 모음
@@ -195,4 +196,59 @@ func satisfactionTest() {
 	creator.Prepare()
 	creator.Build()
 	creator.Display()
+}
+
+type softwareMaker interface {
+	designer
+	coder
+	tester
+}
+
+type designer interface {
+	analyzeDemand()
+	writeDesignDoc()
+}
+
+type coder interface {
+	analyzeDesignDoc()
+	code()
+}
+
+type tester interface {
+	test()
+}
+
+type devTeam struct {
+	name string
+}
+
+func (r *devTeam) analyzeDemand() {
+	fmt.Printf("[%s] Analyzing demand\n", r.name)
+}
+
+func (r *devTeam) writeDesignDoc() {
+	fmt.Printf("[%s] Writing design document\n", r.name)
+}
+
+func (r *devTeam) analyzeDesignDoc() {
+	fmt.Printf("[%s] Analyzing design document\n", r.name)
+}
+
+func (r *devTeam) code() {
+	fmt.Printf("[%s] Coding\n", r.name)
+}
+
+func (r *devTeam) test() {
+	fmt.Printf("[%s] Testing\n", r.name)
+}
+
+func interfaceInInterfaceTest() {
+
+	var myTeam softwareMaker = &devTeam{name: "코어개발팀"}
+
+	myTeam.analyzeDemand()
+	myTeam.writeDesignDoc()
+	myTeam.analyzeDesignDoc()
+	myTeam.code()
+	myTeam.test()
 }
