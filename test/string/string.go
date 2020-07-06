@@ -9,6 +9,7 @@ func main() {
 	stringerTest()
 	goStringerTest()
 	titleTest()
+	strPtrTest()
 }
 
 // StringerType is StringerType
@@ -51,4 +52,15 @@ func goStringerTest() {
 func titleTest() {
 	str := "please make me a title!"
 	fmt.Println(strings.Title(str))
+}
+
+func strPtrTest() {
+
+	hello := "hello"
+	ell := hello[1:4]
+	hello2 := "hello"
+
+	fmt.Printf("&hello=%#v, &hello2=%#v\n", &hello, &hello2)
+
+	fmt.Printf("ell=%#v (ptr: %#v)\n", ell, &ell)
 }
