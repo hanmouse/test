@@ -1,0 +1,15 @@
+loggers {
+    root {
+        level = {{index . "loggers.root.level"}}
+        appender = [
+            console
+        ]
+    }
+    callflow {
+        level = {{index . "loggers.callflow.level"}}
+        additivity = true
+        appender = [
+            callflow
+        ]
+    }
+}

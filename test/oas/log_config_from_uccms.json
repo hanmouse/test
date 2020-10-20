@@ -1,0 +1,12 @@
+{
+    "logConfigList": [
+        {
+            "key": "loggers.root.level",
+            "value": "INFO"
+        },
+        {
+            "key": "loggers.callflow.level",
+            "value": "DEBUG"
+        }
+    ]
+}
